@@ -95,7 +95,7 @@ class OneInchExchange:
         return self.protocols_images
 
 
-    def get_quote(self, from_token_symbol:str, to_token_symbol:str, amount:int):
+    def get_quote(self, from_token_symbol, to_token_symbol, amount):
         url = '{}/{}/{}/quote'.format(
             self.base_url, self.version, self.chain_id)
         url = url + '?fromTokenAddress={}&toTokenAddress={}&amount={}'.format(
@@ -107,8 +107,8 @@ class OneInchExchange:
         return result
 
 
-    def do_swap(self, from_token_symbol:str, to_token_symbol:str,
-        amount:int, slippage:int):
+    def do_swap(self, from_token_symbol, to_token_symbol,
+        amount, slippage):
         self.get_allowance(token_symbol= from_token_symbol)
         url = '{}/{}/{}/swap'.format(
             self.base_url, self.version, self.chain_id)
@@ -151,7 +151,7 @@ class OneInchExchange:
 
         return result
 
-    def approve_transaction(self, token_symbol:str):
+    def approve_transaction(self, token_symbol):
         url = '{}/{}/{}/approve/transaction'.format(
             self.base_url, self.version, self.chain_id)
         url = url + "?tokenAddress={}".format(
@@ -178,9 +178,10 @@ def signAndSend(txn):
 if __name__ == '__main__':
     exchange = OneInchExchange(wallet,"polygon")
     # amt = exchange.convert_amount_to_decimal("USDT",.1)
+    print(exchange.get_quote("MATIC","USDT",0.1))
 
 
     #exchange.get_allowance(token_symbol = "WBTC")
     #print(web3.eth.getTransactionReceipt(0x903309cbff2be7740c14829bad8bfe3d6d8ee00373837cb632d85df0ae5ade19))
-    exchange.do_swap(from_token_symbol='MATIC', to_token_symbol='USDT', amount=0.5,slippage = 1)
+    #exchange.do_swap(from_token_symbol='MATIC', to_token_symbol='USDT', amount=0.1,slippage = 1)
     # txn = eth_exchange.approve_transaction("USDT")
