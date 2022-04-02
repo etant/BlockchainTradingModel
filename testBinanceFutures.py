@@ -15,7 +15,6 @@ def quantityPercision(symbol,size):
 if __name__ == '__main__':
     api_key = os.getenv('api_key_test')
     api_secret = os.getenv('api_secert_test')
-    print(api_key)
 
 
     client = Client(api_key, api_secret,testnet=True)
@@ -56,14 +55,16 @@ if __name__ == '__main__':
 
                 pastTrade = pd.DataFrame(client.futures_account_trades()[-2:])
                 pastTrade["time"] = pd.to_datetime(pastTrade["time"],unit='ms')
-                log.write(pastTrade)
-                log.write(y_name + "price: " +str(signal.y) + "quant: " + str(cap*signal.y_size/signal.y))
-                log.write(x_name + "price: " +str(signal.x) + "quant: " + str(cap*signal.x_size/signal.x))
-                log.write("----------------------------------")
+                for i in range(len(pastTrade)):
+                    log.write(pastTrade["symbol"][i] + " price: " +str(float(pastTrade["price"][i] )) + " quant: " + str(float(pastTrade["qty"][i]))+"\n")
+                log.write("expectations: "+"\n")
+                log.write(y_name + "price: " +str(signal.y) + "quant: " + str(cap*signal.y_size/signal.y)+"\n")
+                log.write(x_name + "price: " +str(signal.x) + "quant: " + str(cap*signal.x_size/signal.x)+"\n")
+                log.write("----------------------------------"+"\n")
                 log.flush()
             except Exception as e:
-                    log.write("There was an error: " + str(e))
-                    log.write("----------------------------------")
+                    log.write("There was an error: " + str(e)+"\n")
+                    log.write("----------------------------------"+"\n")
                     log.flush()
 
         else:
@@ -78,12 +79,14 @@ if __name__ == '__main__':
                 client.futures_create_order(symbol=y_name,side=currentLS[1],type="MARKET",reduceOnly = True,quantity =abs(currentPos[0]))
                 pastTrade = pd.DataFrame(client.futures_account_trades()[-2:])
                 pastTrade["time"] = pd.to_datetime(pastTrade["time"],unit='ms')
-                log.write(pastTrade)
-                log.write(y_name + "price: " +str(signal.y))
-                log.write(x_name + "price: " +str(signal.x))
-                log.write("----------------------------------")
+                for i in range(len(pastTrade)):
+                    log.write(pastTrade["symbol"][i] + " price: " +str(float(pastTrade["price"][i] ))+"\n")
+                log.write("expectations: "+"\n")
+                log.write(y_name + "price: " +str(signal.y)+"\n")
+                log.write(x_name + "price: " +str(signal.x)+"\n")
+                log.write("----------------------------------"+"\n")
                 log.flush()
             except Exception as e:
-                    log.write("There was an error: " + str(e))
-                    log.write("----------------------------------")
+                    log.write("There was an error: " + str(e)+"\n")
+                    log.write("----------------------------------"+"\n")
                     log.flush()
