@@ -14,7 +14,6 @@ def quantityPercision(symbol,size):
 
 if __name__ == '__main__':
 
-
     client = Client(api_key_test, api_secert_test,testnet=True)
 
 
@@ -51,10 +50,11 @@ if __name__ == '__main__':
                     client.futures_create_order(symbol=y_name,type='MARKET',side='BUY',quantity=quantityPercision(y_name,size[0]))
                     client.futures_create_order(symbol=x_name,type='MARKET',side='SELL',quantity=quantityPercision(x_name,size[1]))
 
-                pastTrade = pd.DataFrame(client.futures_account_trades()[-2:])
-                pastTrade["time"] = pd.to_datetime(pastTrade["time"],unit='ms')
-                for i in range(len(pastTrade)):
-                    log.write(pastTrade["symbol"][i] + " price: " +str(float(pastTrade["price"][i] )) + " quant: " + str(float(pastTrade["qty"][i]))+"\n")
+                df = pd.DataFrame(client.futures_account()['positions'])
+                df = df.apply(lambda col:pd.to_numeric(col, errors='ignore'))
+                df = df[df["positionAmt"]!=0]
+                for i in range(len(df)):
+                    log.write(pastTrade["symbol"][i] + " price: " +str(float(pastTrade["entryPrice"][i] )) + " quant: " + str(float(pastTrade["positionAmt"][i]))+"\n")
                 log.write("expectations: "+"\n")
                 log.write(y_name + "price: " +str(signal.y) + "quant: " + str(cap*signal.y_size/signal.y)+"\n")
                 log.write(x_name + "price: " +str(signal.x) + "quant: " + str(cap*signal.x_size/signal.x)+"\n")
