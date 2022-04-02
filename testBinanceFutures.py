@@ -1,6 +1,6 @@
 import os
 
-from binance.client import Client
+from binance import Client
 import pandas as pd
 
 
