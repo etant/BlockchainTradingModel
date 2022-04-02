@@ -76,8 +76,8 @@ if __name__ == '__main__':
                 pastTrade = pd.DataFrame(client.futures_account_trades()[-2:])
                 pastTrade["time"] = pd.to_datetime(pastTrade["time"],unit='ms')
                 log.write(pastTrade)
-                log.write([y_name + "price: " +str(signal.y))
-                log.write([x_name + "price: " +str(signal.x))
+                log.write(y_name + "price: " +str(signal.y))
+                log.write(x_name + "price: " +str(signal.x))
                 log.write("----------------------------------")
                 log.flush()
             except Exception as e:
