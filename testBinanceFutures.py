@@ -2,7 +2,7 @@ import os
 
 from binance import Client
 import pandas as pd
-
+from key import *
 
 def quantityPercision(symbol,size):
     info = client.futures_exchange_info()
@@ -13,11 +13,9 @@ def quantityPercision(symbol,size):
     return int(size*factor)/factor
 
 if __name__ == '__main__':
-    api_key = os.getenv('api_key_test')
-    api_secret = os.getenv('api_secert_test')
 
 
-    client = Client(api_key, api_secret,testnet=True)
+    client = Client(api_key_test, api_secert_test,testnet=True)
 
 
     dic = {"poistion":1,
