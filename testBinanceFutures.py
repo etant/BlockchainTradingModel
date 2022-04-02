@@ -15,6 +15,8 @@ def quantityPercision(symbol,size):
 if __name__ == '__main__':
     api_key = os.getenv('api_key_test')
     api_secret = os.getenv('api_secert_test')
+    print(api_key)
+    
 
     client = Client(api_key, api_secret,testnet=True)
 
