@@ -1,4 +1,4 @@
-import os
+
 
 from binance import Client
 import pandas as pd
@@ -54,7 +54,7 @@ if __name__ == '__main__':
                 df = df.apply(lambda col:pd.to_numeric(col, errors='ignore'))
                 df = df[df["positionAmt"]!=0]
                 for i in range(len(df)):
-                    log.write(pastTrade["symbol"][i] + " price: " +str(float(pastTrade["entryPrice"][i] )) + " quant: " + str(float(pastTrade["positionAmt"][i]))+"\n")
+                    log.write(df["symbol"][i] + " price: " +str(float(df["entryPrice"][i] )) + " quant: " + str(float(df["positionAmt"][i]))+"\n")
                 log.write("expectations: "+"\n")
                 log.write(y_name + "price: " +str(signal.y) + "quant: " + str(cap*signal.y_size/signal.y)+"\n")
                 log.write(x_name + "price: " +str(signal.x) + "quant: " + str(cap*signal.x_size/signal.x)+"\n")
@@ -75,10 +75,11 @@ if __name__ == '__main__':
                 currentLS = ['SELL' if i < 0 else 'BUY' for i in CurrentPos]
                 client.futures_create_order(symbol=x_name,side=currentLS[0],type="MARKET",reduceOnly = True,quantity = abs(currentPos[1]))
                 client.futures_create_order(symbol=y_name,side=currentLS[1],type="MARKET",reduceOnly = True,quantity =abs(currentPos[0]))
-                pastTrade = pd.DataFrame(client.futures_account_trades()[-2:])
-                pastTrade["time"] = pd.to_datetime(pastTrade["time"],unit='ms')
-                for i in range(len(pastTrade)):
-                    log.write(pastTrade["symbol"][i] + " price: " +str(float(pastTrade["price"][i] ))+"\n")
+                df = pd.DataFrame(client.futures_account()['positions'])
+                df = df.apply(lambda col:pd.to_numeric(col, errors='ignore'))
+                df = df[df["positionAmt"]!=0]
+                for i in range(len(df)):
+                    log.write(df["symbol"][i] + " price: " +str(float(df["entryPrice"][i] )) + " quant: " + str(float(df["positionAmt"][i]))+"\n")
                 log.write("expectations: "+"\n")
                 log.write(y_name + "price: " +str(signal.y)+"\n")
                 log.write(x_name + "price: " +str(signal.x)+"\n")
