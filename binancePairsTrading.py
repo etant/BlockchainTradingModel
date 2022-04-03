@@ -123,6 +123,9 @@ def quantityPercision(symbol,size):
     factor = 10.0**prec
     return int(size*factor)/factor
 
+def current_milli_time():
+    return round(time.time() * 1000)
+
 if __name__ == '__main__':
 
 
