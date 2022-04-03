@@ -132,14 +132,14 @@ if __name__ == '__main__':
     while True:
 
         utc_now_dt = datetime.now(tz=pytz.UTC)
-        log.write(str(utc_now_dt)+"\n")
+        log.write(str(utc_now_dt.strftime("%d/%m/%Y %H:%M:%S"))+": "+"\n")
 
         token1data = getBinanceDataFuture(token1,1458955882,current_milli_time())
         token2data = getBinanceDataFuture(token2,1458955882,current_milli_time())
 
         #LookBack Period, SD enter, Sd exit, stoploss
         param = [61*24,2.05,0.1,2.55]
-        bbands,y_name,x_name = signalf(token1data,token2data)
+        bbands,y_name,x_name = signalf(param,token1data,token2data)
         signal = bbands.iloc[-1]
 
         #get current account situation
@@ -173,12 +173,10 @@ if __name__ == '__main__':
                     log.write("expectations: "+"\n")
                     log.write(y_name + "price: " +str(signal.y) + "quant: " + str(cap*signal.y_size/signal.y)+"\n")
                     log.write(x_name + "price: " +str(signal.x) + "quant: " + str(cap*signal.x_size/signal.x)+"\n")
-                    log.write("----------------------------------"+"\n")
-                    log.flush()
+
                 except Exception as e:
                         log.write("There was an error: " + str(e)+"\n")
-                        log.write("----------------------------------"+"\n")
-                        log.flush()
+
 
             else:
                 pass
@@ -190,18 +188,12 @@ if __name__ == '__main__':
                     currentLS = ['SELL' if i < 0 else 'BUY' for i in CurrentPos]
                     client.futures_create_order(symbol=x_name,side=currentLS[0],type="MARKET",reduceOnly = True,quantity = abs(currentPos[1]))
                     client.futures_create_order(symbol=y_name,side=currentLS[1],type="MARKET",reduceOnly = True,quantity =abs(currentPos[0]))
-                    df = pd.DataFrame(client.futures_account()['positions'])
-                    df = df.apply(lambda col:pd.to_numeric(col, errors='ignore'))
-                    df = df[df["positionAmt"]!=0]
-                    for i in range(len(df)):
-                        log.write(df["symbol"][i] + " price: " +str(float(df["entryPrice"][i] )) + " quant: " + str(float(df["positionAmt"][i]))+"\n")
                     log.write("expectations: "+"\n")
                     log.write(y_name + "price: " +str(signal.y)+"\n")
                     log.write(x_name + "price: " +str(signal.x)+"\n")
-                    log.write("----------------------------------"+"\n")
-                    log.flush()
+
                 except Exception as e:
                         log.write("There was an error: " + str(e)+"\n")
-                        log.write("----------------------------------"+"\n")
-                        log.flush()
+        log.write("----------------------------------"+"\n")
+        log.flush()
         time.sleep(60*60)
