@@ -153,7 +153,8 @@ if __name__ == '__main__':
         df = pd.DataFrame(client.futures_account()['positions'])
         df = df.apply(lambda col:pd.to_numeric(col, errors='ignore'))
         #get current long short position size
-        print(df[df["symbol"]==y_name].positionAmt)
+        print(y_name)
+        print(df[df["symbol"]=="TRXUSDT"].positionAmt)
         currentPos = [float(df[df["symbol"]==y_name].positionAmt),float(df[df["symbol"]==x_name].positionAmt)]
 
         if signal.poistion !=0:
