@@ -156,7 +156,7 @@ if __name__ == '__main__':
 
         currentPos = [float(df[df["symbol"]==y_name].positionAmt),float(df[df["symbol"]==x_name].positionAmt)]
 
-        if signal.poistion !=0:
+        if signal.position !=0:
             #if current signal
             if currentPos==[0,0]:
                 new_lvrg = 1
@@ -164,7 +164,7 @@ if __name__ == '__main__':
                 client.futures_change_leverage(symbol = x_name,leverage=new_lvrg)
                 size = [cap*signal.y_size/float(client.futures_symbol_ticker(symbol = y_name)['price']),cap*signal.x_size/float(client.futures_symbol_ticker(symbol = x_name)['price'])]
                 try:
-                    if signal.poistion == -1:
+                    if signal.position == -1:
                         client.futures_create_order(symbol=y_name,type='MARKET',side='SELL',quantity=quantityPercision(y_name,size[0]))
                         client.futures_create_order(symbol=x_name,type='MARKET',side='BUY',quantity=quantityPercision(y_name,size[1]))
                     else:
