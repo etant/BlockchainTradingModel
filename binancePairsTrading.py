@@ -202,4 +202,5 @@ if __name__ == '__main__':
                         log.write("There was an error: " + str(e)+"\n")
         log.write("----------------------------------"+"\n")
         log.flush()
+        print("its working my friend")
         time.sleep(60*60)
