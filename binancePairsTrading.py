@@ -38,7 +38,7 @@ def getBinanceDataFuture(symbol, interval, start, end, limit=5000):
 
 
 def signalf(varaible,a,b):
- lookback,sdenter,sdexit,sdloss = varaible
+    lookback,sdenter,sdexit,sdloss = varaible
     lookback = int(lookback)
 
 
