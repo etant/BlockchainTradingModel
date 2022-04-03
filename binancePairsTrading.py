@@ -8,6 +8,7 @@ from talib.abstract import *
 from statsmodels.tsa.stattools import adfuller
 import statsmodels.api as sm
 import pytz
+#pip install TA-Lib
 
 def getBinanceDataFuture(symbol, interval, start, end, limit=5000):
     df = pd.DataFrame()
@@ -126,6 +127,8 @@ if __name__ == '__main__':
 
 
     client = Client(api_key, api_secret)
+    log = open("tradingLog.txt", "a")
+
 
     token1="XRPUSDT"
     token2="TRXUSDT"
