@@ -149,7 +149,7 @@ if __name__ == '__main__':
         signal = bbands.iloc[-1]
 
         #get current account situation
-        cap = client.futures_account()["totalMarginBalance"]*.99
+        cap = float(client.futures_account()["totalMarginBalance"])*.99
         df = pd.DataFrame(client.futures_account()['positions'])
         df = df.apply(lambda col:pd.to_numeric(col, errors='ignore'))
 
