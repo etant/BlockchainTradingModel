@@ -38,7 +38,7 @@ def getBinanceDataFuture(symbol, interval, start, end, limit=5000):
 
 
 
-def signalf(varaible,a,b):
+def signalf(varaible,a,b,a_name,b_name):
     lookback,sdenter,sdexit,sdloss = varaible
     lookback = int(lookback)
 
@@ -57,8 +57,8 @@ def signalf(varaible,a,b):
 
         hedge = reg.params[0]
         spread = reg.resid
-        y_name = str(a)
-        x_name = str(b)
+        y_name = a_name
+        x_name = b_name
 
     else:
         y = pairPrice['Close_y']
@@ -66,8 +66,8 @@ def signalf(varaible,a,b):
 
         hedge = reg2.params[0]
         spread = reg2.resid
-        y_name = str(b)
-        x_name = str(a)
+        y_name = a_name
+        x_name = b_name
 
 
 
@@ -145,7 +145,7 @@ if __name__ == '__main__':
 
         #LookBack Period, SD enter, Sd exit, stoploss
         param = [61*24,2.05,0.1,2.55]
-        bbands,y_name,x_name = signalf(param,token1data,token2data)
+        bbands,y_name,x_name = signalf(param,token1data,token2data,token1,token2)
         signal = bbands.iloc[-1]
 
         #get current account situation
@@ -153,8 +153,7 @@ if __name__ == '__main__':
         df = pd.DataFrame(client.futures_account()['positions'])
         df = df.apply(lambda col:pd.to_numeric(col, errors='ignore'))
         #get current long short position size
-        print(y_name)
-        print(df[df["symbol"]=="TRXUSDT"].positionAmt)
+
         currentPos = [float(df[df["symbol"]==y_name].positionAmt),float(df[df["symbol"]==x_name].positionAmt)]
 
         if signal.poistion !=0:
