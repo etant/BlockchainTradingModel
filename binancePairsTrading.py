@@ -140,8 +140,8 @@ if __name__ == '__main__':
         utc_now_dt = datetime.now(tz=pytz.UTC)
         log.write(str(utc_now_dt.strftime("%d/%m/%Y %H:%M:%S"))+": "+"\n")
 
-        token1data = getBinanceDataFuture(token1,1458955882,current_milli_time())
-        token2data = getBinanceDataFuture(token2,1458955882,current_milli_time())
+        token1data = getBinanceDataFuture(token1,'1h',1458955882,current_milli_time())
+        token2data = getBinanceDataFuture(token2,'1h',1458955882,current_milli_time())
 
         #LookBack Period, SD enter, Sd exit, stoploss
         param = [61*24,2.05,0.1,2.55]
