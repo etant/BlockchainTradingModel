@@ -152,8 +152,8 @@ if __name__ == '__main__':
         cap = float(client.futures_account()["totalMarginBalance"])*.99
         df = pd.DataFrame(client.futures_account()['positions'])
         df = df.apply(lambda col:pd.to_numeric(col, errors='ignore'))
-        print(client.futures_account()['positions'])
         #get current long short position size
+        print(df[df["symbol"]==y_name].positionAmt)
         currentPos = [float(df[df["symbol"]==y_name].positionAmt),float(df[df["symbol"]==x_name].positionAmt)]
 
         if signal.poistion !=0:
