@@ -2,7 +2,7 @@ from key import *
 from binance.client import Client
 import pandas as pd
 import time
-from datetime import datetime, tzinfo
+from datetime import datetime, tzinfo, timedelta
 import talib
 from talib.abstract import *
 from statsmodels.tsa.stattools import adfuller
@@ -74,15 +74,15 @@ def signalf(varaible,a,b,a_name,b_name):
     #creating bbands
     bands = pd.DataFrame(BBANDS(spread,timeperiod=lookback,nbdevup=sdenter,nbdevdn = sdenter,matype=1)).T
     bands = bands.set_index(pairPrice.index)
-    bands.columns = ['1upper','1mid','1lower']
+    bands.columns = ['Short','1mid','Long']
 
     bands2 = pd.DataFrame(BBANDS(spread,timeperiod=lookback,nbdevup=sdexit,nbdevdn = sdexit,matype=1)).T
     bands2 = bands2.set_index(pairPrice.index)
-    bands2.columns = ['upper','mid','lower']
+    bands2.columns = ['exShort','mid','exLong']
 
     bands3 = pd.DataFrame(BBANDS(spread,timeperiod=lookback,nbdevup=sdloss,nbdevdn = sdloss,matype=1)).T
     bands3 = bands3.set_index(pairPrice.index)
-    bands3.columns = ['upper2','mid2','lower2']
+    bands3.columns = ['stShort','mid2','stLong']
     bbands = bands2.join(bands)
     bbands = bbands.join(bands3)
     bbands = bbands.drop(columns = ['mid','1mid','mid2'])
@@ -94,23 +94,6 @@ def signalf(varaible,a,b,a_name,b_name):
 
 
     bbands = bbands.dropna()
-
-    #creating positions
-    bbands.loc[bbands['spread']>bbands['1upper'],'position']=-1
-    bbands.loc[(bbands['spread']<bbands['upper']) & (bbands['spread']>bbands['lower']),'position']=0
-    bbands.loc[bbands['spread']<bbands['1lower'],'position']=1
-    bbands.loc[(bbands["spread"]<bbands["lower2"]) | (bbands["spread"]>bbands["upper2"]),'position']=0
-    bbands = bbands.ffill()
-    bbands['oposition'] = -1*bbands["position"]
-    bbands = bbands.fillna(0)
-    #creating size
-    bbands.loc[bbands['position'].diff()!=0,"ysize"] = bbands["y"]/(bbands["x"]*bbands["hedge"]+bbands["y"])
-    bbands['xsize'] = 1-bbands['ysize']
-
-    #creating the diff
-    bbands[['ydiff','xdiff']] = bbands[['y','x']].diff()
-    bbands = bbands.ffill()
-
 
 
     return bbands,y_name,x_name
@@ -126,6 +109,27 @@ def quantityPercision(symbol,size):
 def current_milli_time():
     return round(time.time() * 1000)
 
+
+def getPostion(signal,currentPos):
+    if (currentPos ==[0,0]).all():
+        if (signal["spread"]>signal["Short"])&(signal["spread"]<signal["stShort"]):
+            return -1
+        elif (signal["spread"]<signal["Long"]) & (signal["spread"]>signal["stLong"]):
+            return 1
+        else:
+            return 0
+    elif (np.sign(currentPos)==[-1,1]).all():
+        if (signal["spread"]<signal["exShort"])|(signal["spread"]>signal["stShort"]):
+            return 0
+        else:
+            return -1
+    else:
+        if (signal["spread"]>signal["exLong"])|(signal["spread"]<signal["stLong"]):
+            return 0
+        else:
+            return 1
+
+
 if __name__ == '__main__':
 
 
@@ -139,6 +143,10 @@ if __name__ == '__main__':
     client.futures_change_leverage(symbol = token1,leverage=new_lvrg)
     client.futures_change_leverage(symbol = token2,leverage=new_lvrg)
     while True:
+        now = datetime.utcnow()
+        nexthour = now.replace(microsecond=0, second=0, minute=0)+timedelta(hours=1)
+        timesleep = (nexthour-now).seconds
+        time.sleep(timesleep)
 
         utc_now_dt = datetime.now(tz=pytz.UTC)
         log.write(str(utc_now_dt.strftime("%d/%m/%Y %H:%M:%S"))+": "+"\n")
@@ -147,9 +155,10 @@ if __name__ == '__main__':
         token2data = getBinanceDataFuture(token2,'1h',1458955882,current_milli_time())
 
         #LookBack Period, SD enter, Sd exit, stoploss
-        param = [61*24,2.05,0.1,2.55]
+        param = [61*24,1.50,0.1,2.55]
         bbands,y_name,x_name = signalf(param,token1data,token2data,token1,token2)
         signal = bbands.iloc[-1]
+
 
         #get current account situation
         cap = float(client.futures_account()["totalMarginBalance"])*.5
@@ -158,32 +167,33 @@ if __name__ == '__main__':
         #get current long short position size
 
         currentPos = [float(df[df["symbol"]==y_name].positionAmt),float(df[df["symbol"]==x_name].positionAmt)]
+        position = getPostion(signal,currentPos)
 
-        if signal.position !=0:
-            #if current signal
+        if position !=0:
             if currentPos==[0,0]:
+                #get percetange of y and x
+                yp = signal["y"]/(signal["x"]*signal["hedge"]+signal["y"])
+                xp = 1-yp
+                #get sizing
+                size = np.array([position*cap*yp/float(client.futures_symbol_ticker(symbol = y_name)['price']),-1*position*cap*xp/float(client.futures_symbol_ticker(symbol = x_name)['price']))
+                LS = ['SELL' if i < 0 else 'BUY' for i in size]
 
-                size = [cap*signal.y_size/float(client.futures_symbol_ticker(symbol = y_name)['price']),cap*signal.x_size/float(client.futures_symbol_ticker(symbol = x_name)['price'])]
                 try:
-                    if signal.position == -1:
-                        client.futures_create_order(symbol=y_name,type='MARKET',side='SELL',quantity=quantityPercision(y_name,size[0]))
-                        client.futures_create_order(symbol=x_name,type='MARKET',side='BUY',quantity=quantityPercision(y_name,size[1]))
-                    else:
-                        client.futures_create_order(symbol=y_name,type='MARKET',side='BUY',quantity=quantityPercision(y_name,size[0]))
-                        client.futures_create_order(symbol=x_name,type='MARKET',side='SELL',quantity=quantityPercision(x_name,size[1]))
-
+                    client.futures_create_order(symbol=y_name,type='MARKET',side=LS[0],quantity=quantityPercision(y_name,abs(size[0])))
+                    client.futures_create_order(symbol=x_name,type='MARKET',side=LS[1],quantity=quantityPercision(x_name,abs(size[1])))
+                    
                     df = pd.DataFrame(client.futures_account()['positions'])
                     df = df.apply(lambda col:pd.to_numeric(col, errors='ignore'))
                     df = df[df["positionAmt"]!=0]
                     for i in range(len(df)):
                         log.write(df["symbol"][i] + " price: " +str(float(df["entryPrice"][i] )) + " quant: " + str(float(df["positionAmt"][i]))+"\n")
+
                     log.write("expectations: "+"\n")
-                    log.write(y_name + "price: " +str(signal.y) + "quant: " + str(cap*signal.y_size/signal.y)+"\n")
-                    log.write(x_name + "price: " +str(signal.x) + "quant: " + str(cap*signal.x_size/signal.x)+"\n")
+                    log.write(y_name + "price: " +str(signal.y) + "quant: " + str(size[0])+"\n")
+                    log.write(x_name + "price: " +str(signal.x) + "quant: " + str(size[1])+"\n")
 
                 except Exception as e:
                         log.write("There was an error: " + str(e)+"\n")
-
 
             else:
                 pass
@@ -203,5 +213,3 @@ if __name__ == '__main__':
                         log.write("There was an error: " + str(e)+"\n")
         log.write("----------------------------------"+"\n")
         log.flush()
-        print("its working my friend")
-        time.sleep(60*60*)
