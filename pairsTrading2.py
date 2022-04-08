@@ -178,7 +178,7 @@ if __name__ == '__main__':
                 yp = signal["y"]/(signal["x"]*signal["hedge"]+signal["y"])
                 xp = 1-yp
                 #get sizing
-                size = np.array([position*cap*yp/float(client.futures_symbol_ticker(symbol = y_name)['price']),-1*position*cap*xp/float(client.futures_symbol_ticker(symbol = x_name)['price']))
+                size = np.array([position*cap*yp/float(client.futures_symbol_ticker(symbol = y_name)['price']),-1*position*cap*xp/float(client.futures_symbol_ticker(symbol = x_name)['price'])])
                 LS = ['SELL' if i < 0 else 'BUY' for i in size]
 
                 try:

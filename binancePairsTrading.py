@@ -175,13 +175,13 @@ if __name__ == '__main__':
                 yp = signal["y"]/(signal["x"]*signal["hedge"]+signal["y"])
                 xp = 1-yp
                 #get sizing
-                size = np.array([position*cap*yp/float(client.futures_symbol_ticker(symbol = y_name)['price']),-1*position*cap*xp/float(client.futures_symbol_ticker(symbol = x_name)['price']))
+                size = np.array([position*cap*yp/float(client.futures_symbol_ticker(symbol = y_name)['price']),-1*position*cap*xp/float(client.futures_symbol_ticker(symbol = x_name)['price'])])
                 LS = ['SELL' if i < 0 else 'BUY' for i in size]
 
                 try:
                     client.futures_create_order(symbol=y_name,type='MARKET',side=LS[0],quantity=quantityPercision(y_name,abs(size[0])))
                     client.futures_create_order(symbol=x_name,type='MARKET',side=LS[1],quantity=quantityPercision(x_name,abs(size[1])))
-                    
+
                     df = pd.DataFrame(client.futures_account()['positions'])
                     df = df.apply(lambda col:pd.to_numeric(col, errors='ignore'))
                     df = df[df["positionAmt"]!=0]
