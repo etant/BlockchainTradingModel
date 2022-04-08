@@ -133,21 +133,28 @@ if __name__ == '__main__':
     log = open("tradingLog.txt", "a")
 
 
-    token1="XRPUSDT"
-    token2="TRXUSDT"
+    token1="EOSUSDT"
+    token2="NEOUSDT"
     new_lvrg = 1
     client.futures_change_leverage(symbol = token1,leverage=new_lvrg)
     client.futures_change_leverage(symbol = token2,leverage=new_lvrg)
+
     while True:
 
-        utc_now_dt = datetime.now(tz=pytz.UTC)
+        dt = datetime.utcnow().date()
+        today = datetime.combine(dt, datetime.min.time())
+        tmr = today + timedelta(days = 1)
+        now = datetime.utcnow()
+        sleeptime = (tmr-now).seconds
+        time.sleep(sleeptime)
+
         log.write(str(utc_now_dt.strftime("%d/%m/%Y %H:%M:%S"))+": "+"\n")
 
-        token1data = getBinanceDataFuture(token1,'1h',1458955882,current_milli_time())
-        token2data = getBinanceDataFuture(token2,'1h',1458955882,current_milli_time())
+        token1data = getBinanceDataFuture(token1,'1d',1458955882,current_milli_time())
+        token2data = getBinanceDataFuture(token2,'1d',1458955882,current_milli_time())
 
         #LookBack Period, SD enter, Sd exit, stoploss
-        param = [61*24,2.05,0.1,2.55]
+        param = [10, 1.8, 0.8, 4.0]
         bbands,y_name,x_name = signalf(param,token1data,token2data,token1,token2)
         signal = bbands.iloc[-1]
 
@@ -203,5 +210,4 @@ if __name__ == '__main__':
                         log.write("There was an error: " + str(e)+"\n")
         log.write("----------------------------------"+"\n")
         log.flush()
-        print("its working my friend")
-        time.sleep(60*60*)
+        time.sleep(60)
