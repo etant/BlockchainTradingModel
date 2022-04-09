@@ -111,7 +111,7 @@ def current_milli_time():
 
 
 def getPostion(signal,currentPos):
-    if (currentPos ==[0,0]).all():
+    if currentPos ==[0,0]:
         if (signal["spread"]>signal["Short"])&(signal["spread"]<signal["stShort"]):
             return -1
         elif (signal["spread"]<signal["Long"]) & (signal["spread"]>signal["stLong"]):
