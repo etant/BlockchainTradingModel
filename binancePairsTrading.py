@@ -8,6 +8,7 @@ from talib.abstract import *
 from statsmodels.tsa.stattools import adfuller
 import statsmodels.api as sm
 import pytz
+import numpy as np
 #pip install TA-Lib
 
 def getBinanceDataFuture(symbol, interval, start, end, limit=5000):
