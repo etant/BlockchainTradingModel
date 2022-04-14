@@ -7,6 +7,7 @@ import talib
 from talib.abstract import *
 from statsmodels.tsa.stattools import adfuller
 import statsmodels.api as sm
+import numpy as np
 import pytz
 #pip install TA-Lib
 
